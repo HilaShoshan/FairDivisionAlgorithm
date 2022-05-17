@@ -79,6 +79,12 @@ def isEF11_two(first, second, worst, best):
     return False
 
 
+def isEF_two(first, second):
+    if first >= second:
+        return True
+    return False
+
+
 def utility(agent, bundle, utilities):
     """
     :param agent: agent index
