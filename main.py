@@ -6,19 +6,20 @@ def algorithm1(n, utilities, s, stopOnEF1=True):
     implemantation of our algorithm, with an extension to n agents
     """
     w = tuple([1/n]*n)  # tuple of initial agents' weights (all equal)
-    A = get_w_maximal_allocation(w, utilities, s)  # (A1, A2, ..., An), ∀i, Ai is of type list
-    if is_EF1(A):
+    A = get_w_maximal_allocation(w, utilities, s, plotGraph=True)  # (A1, A2, ..., An), ∀i, Ai is of type list
+    # print(A)
+    if is_EF1(A, utilities):
         print(A, " is EF1!")
         if stopOnEF1:
             return A
-    if get_envious(A) == 1:  # the allocation is EF for 2
+    if not ordered(A):  # the allocation is not satisfies the envy-order 1 > 2 > ... > n
         A = replace_names(A)
     # we can now assume that for each i,j such that i>j, the allocation is EF for i w.r.t j
     # in particular, the allocation is EF for agent 1
     item_pairs = get_exchangeable_items(A)
     exchangeable_pair = get_max_r_pair(item_pairs)
     while True:
-        if not is_EF1(A):
+        if not is_EF1(A, utilities):
             A = exchange_pair(exchangeable_pair)
             item_pairs = get_exchangeable_items(A)
             exchangeable_pair = get_max_r_pair(item_pairs)

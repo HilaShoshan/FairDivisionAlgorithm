@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import *
+from itertools import permutations
 
 
 epsilon = 0.0001  # to solve numeric problems
@@ -29,13 +30,24 @@ def get_w_maximal_allocation(w, utilities, s, plotGraph=False):
     return get_allocation(len(w), matching)
 
 
-def is_EF1(A):
-    pass
+def is_EF1(A, utilities):
+    n = len(A)  # number of agents
+    pairs = list(permutations(np.arange(n), 2))  # all the pairs of agents
+    for pair in pairs: 
+        agent0 = pair[0]
+        agent1 = pair[1]
+        u0A0_lst = utility(agent0, A[agent0], utilities)
+        u0A1_lst = utility(agent0, A[agent1], utilities)
+        if not isEF1_two(sum(u0A0_lst), sum(u0A1_lst), min(u0A0_lst), max(u0A1_lst)):
+            return False
+    return True
 
 
-def get_envious(A):
+def ordered(A):
     """
-    given allocation A, returns the agent who is envy
+    :param A: an allocation
+    :return: true if the envy-order equals to 1 > 2 > ... > n
+             else reurn false
     """
     pass
 

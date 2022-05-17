@@ -50,3 +50,49 @@ def get_allocation(n, matching):
         A[agent].append(item)
         # print("item ", item, " appended to agent ", agent, " allocation.")
     return A
+
+
+def isEF1_two(first, second, worst, best):
+    """
+    :param first: some agent's utility on his bundle
+    :param second: first's utility on other agent's bundle
+    :param worst: the most difficult chore on first's bundle (in his eyes)
+    :param best: the most valuable good in second's bundle (in the first's eyes)
+    :return: true if the first envious the second up to one item
+    (i.e. the allocation is EF1 for first w.r.t second)
+    """
+    if first-worst >= second or first >= second-best:
+        return True
+    return False
+
+
+def isEF11_two(first, second, worst, best):
+    """
+    :param first: some agent's utility on his bundle
+    :param second: first's utility on other agent's bundle
+    :param worst: the most difficult chore on first's bundle (in his eyes)
+    :param best: the most valuable good in second's bundle (in the first's eyes)
+    :return: true if the first envious the second up to one good and one chore
+    """
+    if first-worst >= second-best:
+        return True
+    return False
+
+
+def utility(agent, bundle, utilities):
+    """
+    :param agent: agent index
+    :param bundle: some bundle (Ai)
+    :return: a list containing the agent's utility values on each item in the bundle
+    """
+    res = []
+    for item in bundle:
+        type = item.split("_")[0]  # a real item or a dummy
+        if type == "d":
+            res.append(0)
+        else:  # "o"
+            indices = item.split("_")[1].split(",")
+            category_indx = int(indices[0])
+            item_indx = int(indices[1])
+            res.append(utilities[category_indx][item_indx][agent])
+    return res
