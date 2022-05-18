@@ -1,3 +1,4 @@
+from cmath import inf
 import numpy as np
 import matplotlib.pyplot as plt
 from Utils import *
@@ -14,7 +15,7 @@ class W_maximal_allocation:
         self.I = I  # problem instance
         self.w = w  # agents' weights
         self.A = self.get_w_maximal_allocation(w)  # the allocation
-        self.item_pairs = None
+        self.item_pairs = {}
 
 
     def get_w_maximal_allocation(self, w, plotGraph=False):
@@ -85,6 +86,8 @@ class W_maximal_allocation:
         if not isEF_two(sum(u0A0_lst), sum(u0A1_lst)):  # 0 envious 1
             print("0 envious 1!")
             self.replace_names(0, 1)  
+        else:
+            print("1 envious 0!")
                 
 
     def order_names(self):
@@ -114,14 +117,29 @@ class W_maximal_allocation:
     def add_exchangeable_pairs_two(self, i, j):
         for oi in self.A[i]:
             for oj in self.A[j]:
-                print(oi, oj)
+                # check if both items are in the same category
+                oi_category, oi_idx = get_category_and_index(oi)
+                oj_category, oj_idx = get_category_and_index(oj)
+                if oi_category != oj_category:
+                    continue
+                # check if j preferes oi
+                ujoi = self.I.utilities[oi_category][oi_idx][j]
+                ujoj = self.I.utilities[oj_category][oj_idx][j]
+                if ujoi > ujoj:
+                    key = str(i) + "," + str(j)
+                    if key not in self.item_pairs.keys():
+                        self.item_pairs[key] = [(oi, oj)]
+                    else: 
+                        value = self.item_pairs[key]
+                        value.append(tuple((oi, oj)))  # add this pair to the value list
+                        self.item_pairs[key] = value  # update it in the dictionary
 
 
     def update_exchangeable_items(self):
         """
         Create a set of exchangeable pairs whose replacement will benefit the envy agents' utilities.
         It is actually a dictionary in form {
-                                                (i,j): [(),(),...]
+                                                'i,j': [(),(),...]
                                                 ...
                                             }
         i.e., the keys are the pairs of agents that the exchangeable pairs belong to them,
@@ -136,18 +154,44 @@ class W_maximal_allocation:
             if not isEF_two(sum(ujAj_lst), sum(ujAi_lst)):  # j envious i
                 # find all the exchangeable pairs that can benefit him
                 self.add_exchangeable_pairs_two(i, j)
+                # print("exchangeable pairs for ", i, " and ", j, ":\n", self.item_pairs)
 
 
     def get_max_r_pair(self):
         """
-        :param item_pairs: a list of exchangeable pairs
-        :return: the pair with the maximal r value
+        Find the pair with the maximal r value among all the exchangeable pairs (in self.item_pairs).
+        :return: the pair with the maximal r value and the agents that should replace it.
+                 Specificaly, the function returns i,j,(oi,oj) s.t. oi∈Ai, oj∈Aj
         """
-        pass
+        max_i = -1
+        max_j = -1
+        max_oi = None
+        max_oj = None
+        max_r = -inf
+        for key in self.item_pairs.keys():  # key = agents pair
+            i = int(key.split(",")[0])
+            j = int(key.split(",")[1])
+            pairs_list = self.item_pairs[key]
+            for pair in pairs_list:
+                oi = pair[0]
+                oj = pair[1]
+                r = compute_r(i, j, oi, oj, self.I.utilities)
+                if r > max_r:
+                    max_r = r
+                    max_i = i
+                    max_j = j
+                    max_oi = oi
+                    max_oj = oj
+        return max_i, max_j, (max_oi, max_oj)
 
 
-    def exchange_pair(self, exchangeable_pair):
+    def exchange_pair(self, i, j, exchangeable_pair):
         """
-        exchange the given pair between the agents
+        exchange the given pair between agents i and j
         """
-        pass
+        oi = exchangeable_pair[0]
+        oj = exchangeable_pair[1]
+        oi_idx =  self.A[i].index(oi)  # the index of oi in A[i]
+        oj_idx =  self.A[j].index(oj)  # the index of oj in A[j]
+        self.A[i][oi_idx] = oj
+        self.A[j][oj_idx] = oi

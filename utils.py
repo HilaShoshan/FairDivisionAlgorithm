@@ -45,6 +45,18 @@ def recognize_agent_and_item(match):
     return agent, item
 
 
+def get_category_and_index(item):
+    """
+    :param item: a string of form o_c_j (or d_c_j), 
+                 when c representing the category and j representing the index of the item in category c.
+    :return: c and j
+    """
+    splitted = item.split("_")[1].split(",")
+    c = int(splitted[0])
+    j = int(splitted[1])
+    return c, j
+
+
 def get_allocation(n, matching):
     # print(matching)
     A = tuple(list() for _ in range(n))  # an empty allocation in form A = (A1, A2, ..., An)
@@ -110,3 +122,21 @@ def utility(agent, bundle, utilities):
             item_indx = int(indices[1])
             res.append(utilities[category_indx][item_indx][agent])
     return res
+
+
+def compute_r(i, j, oi, oj, utilities):
+    """
+    computes the difference ratio r (by definition 4.6):
+    r(i,j,oi,oj) = [uj(oi)-uj(oj)] / [ui(oi)-ui(oj)]
+    """
+    # TODO: add edge cases!
+    oi_category, oi_idx = get_category_and_index(oi)
+    oj_category, oj_idx = get_category_and_index(oj)
+    # numerator elements
+    ujoi = utilities[oi_category][oi_idx][j]
+    ujoj = utilities[oj_category][oj_idx][j]
+    # denominator elements
+    uioi = utilities[oi_category][oi_idx][i]
+    uioj = utilities[oj_category][oj_idx][i]
+    # ratio
+    return (ujoi-ujoj) / (uioi-uioj)
