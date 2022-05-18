@@ -1,6 +1,9 @@
 import networkx as nx
 
 
+epsilon = 0.0001  # to solve numeric problems
+
+
 def create_G(w, utilities, s):
     """
     create Gw graph using the weights and the utilities and return it.
