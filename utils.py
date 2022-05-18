@@ -83,6 +83,11 @@ def isEF11_two(first, second, worst, best):
 
 
 def isEF_two(first, second):
+    """
+    :param first: some agent's utility on his bundle
+    :param second: first's utility on other agent's bundle
+    :return: true if the first does not envy the second
+    """
     if first >= second:
         return True
     return False

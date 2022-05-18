@@ -13,7 +13,7 @@ class W_maximal_allocation:
     def __init__(self, I, w):
         self.I = I  # problem instance
         self.w = w  # agents' weights
-        self.A = self.get_w_maximal_allocation(w, plotGraph=True)  # the allocation
+        self.A = self.get_w_maximal_allocation(w)  # the allocation
         self.item_pairs = None
 
 
@@ -43,11 +43,11 @@ class W_maximal_allocation:
     def is_EF1(self):
         pairs = list(permutations(np.arange(self.I.n), 2))  # all the pairs of agents, with an importance to the order
         for pair in pairs: 
-            agent0 = pair[0]
-            agent1 = pair[1]
-            u0A0_lst = utility(agent0, self.A[agent0], self.I.utilities)
-            u0A1_lst = utility(agent0, self.A[agent1], self.I.utilities)
-            if not isEF1_two(sum(u0A0_lst), sum(u0A1_lst), min(u0A0_lst), max(u0A1_lst)):
+            i = pair[0]
+            j = pair[1]
+            uiAi_lst = utility(i, self.A[i], self.I.utilities)
+            uiAj_lst = utility(i, self.A[j], self.I.utilities)
+            if not isEF1_two(sum(uiAi_lst), sum(uiAj_lst), min(uiAi_lst), max(uiAj_lst)):
                 return False
         return True    
 
@@ -73,6 +73,18 @@ class W_maximal_allocation:
                 item_utilities[agent0] = item_utilities[agent1]
                 item_utilities[agent1] = temp
                 self.I.utilities[c][j] = tuple(item_utilities)
+
+
+    def order_names_two(self):
+        """
+        A function for the special case of n=2 only.
+        If 0 is the envious agent 1 (in the initial allocation), replace the names of agent 0 and agent 1
+        """
+        u0A0_lst = utility(0, self.A[0], self.I.utilities)
+        u0A1_lst = utility(0, self.A[1], self.I.utilities)
+        if not isEF_two(sum(u0A0_lst), sum(u0A1_lst)):  # 0 envious 1
+            print("0 envious 1!")
+            self.replace_names(0, 1)  
                 
 
     def order_names(self):
@@ -99,13 +111,31 @@ class W_maximal_allocation:
                 hash[agent1] = agent0
 
 
+    def add_exchangeable_pairs_two(self, i, j):
+        for oi in self.A[i]:
+            for oj in self.A[j]:
+                print(oi, oj)
+
+
     def update_exchangeable_items(self):
         """
-        :return: a set of exchangeable pairs whose replacement will benefit the envy agents' utilities
+        Create a set of exchangeable pairs whose replacement will benefit the envy agents' utilities.
+        It is actually a dictionary in form {
+                                                (i,j): [(),(),...]
+                                                ...
+                                            }
+        i.e., the keys are the pairs of agents that the exchangeable pairs belong to them,
+        and the values are lists of exchangeable pairs that benefit agent j (the jealous one).
         """
         pairs = list(combinations(np.arange(self.I.n), 2))  # all the pairs of agents (i, j) s.t. i < j
-        for pair in pairs:
-            pass
+        for pair in pairs: 
+            i = pair[0]
+            j = pair[1]
+            ujAj_lst = utility(j, self.A[j], self.I.utilities)
+            ujAi_lst = utility(j, self.A[i], self.I.utilities)
+            if not isEF_two(sum(ujAj_lst), sum(ujAi_lst)):  # j envious i
+                # find all the exchangeable pairs that can benefit him
+                self.add_exchangeable_pairs_two(i, j)
 
 
     def get_max_r_pair(self):

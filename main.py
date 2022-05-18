@@ -14,17 +14,20 @@ def algorithm1(I, stopOnEF1=True):
     # Step 1: Find a w-maximal feasible allocation that is EF for some agent.
     w = tuple([1/n]*n)  # a tuple of initial agents' weights (all equal)
     A = W_maximal_allocation(I, w)  # (A1, A2, ..., An), ∀i, Ai is of type list
+    print("Allocation A: ", A.A)
     if A.is_EF1():
         print(A, " is EF1!")
         if stopOnEF1:
             return A
     # replace agent names if needed such that the envy-order will be 1 > 2 > ... > n
-    A.order_names()  
+    # A.order_names()  TODO: Fix it!
+    A.order_names_two()  # for a special case
     # we can now assume that for each i,j such that i>j, the allocation is EF for i w.r.t j
     # in particular, the allocation is EF for agent 1
 
     # Step 2: Build a set of item-pairs whose replacement increases the envy-agents' utilities:
     A.update_exchangeable_items()
+    return
     exchangeable_pair = A.get_max_r_pair()
 
     # Step 3: Switch items in order until an EF1 allocation is found
@@ -40,10 +43,18 @@ def algorithm1(I, stopOnEF1=True):
         # TODO: add here some stoping condition
                 
 
-utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
-            [(-4,-1,0),(-5,-3,-2),(-6,-4,-6)],
-            [(-2,-6,-7),(-4,-6,-7)]]
-capacities = (1, 2, 1)  # capacity constraints
-n = 3
+# 2 agents
+utilities = [[(-1,-1),(-4,-4)],
+            [(0,-1),(-5,-7)]]
+capacities = (1, 1)
+n = 2
+
+# 3 agents
+# utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
+#             [(-4,-1,0),(-5,-3,-2),(-6,-4,-6)],
+#             [(-2,-6,-7),(-4,-6,-7)]]
+# capacities = (1, 2, 1)  # capacity constraints
+# n = 3
+
 I = Instance(utilities, capacities, n)
 algorithm1(I)
