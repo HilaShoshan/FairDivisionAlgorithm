@@ -19,11 +19,6 @@ def algorithm1(I, stopOnEF1=True):
         print(A.A, " is EF1!")
         if stopOnEF1:
             return A
-    # replace agent names if needed such that the envy-order will be 1 > 2 > ... > n
-    # A.order_names()  TODO: Fix it!
-    A.order_names_two()  # for a special case
-    # we can now assume that for each i,j such that i>j, the allocation is EF for i w.r.t j
-    # in particular, the allocation is EF for agent 1
 
     # Step 2: Build a set of item-pairs whose replacement increases the envy-agents' utilities:
     A.update_exchangeable_items()
@@ -33,10 +28,10 @@ def algorithm1(I, stopOnEF1=True):
     while True:
         if not A.is_EF1():
             A.exchange_pair(i, j, exchangeable_pair)
+            print("exchange ", exchangeable_pair, " between ", i, " and ", j)
+            print("updated A = ", A.A)
             A.update_exchangeable_items()
             i, j, exchangeable_pair = A.get_max_r_pair()
-            print("exchange ", exchangeable_pair, " between ", i, " and ", j)
-            print("A = ", A.A)
         else: 
             print(A.A, " is EF1!")
             if stopOnEF1:
@@ -45,17 +40,17 @@ def algorithm1(I, stopOnEF1=True):
                 
 
 # 2 agents
-utilities = [[(0,0),(-1,-1),(-4,-2),(-5,-1)],
-            [(0,-1),(2,0)]]
-capacities = (2, 1)
-n = 2
+# utilities = [[(0,0),(-1,-1),(-4,-2),(-5,-1)],
+#             [(0,-1),(2,0)]]
+# capacities = (2, 1)
+# n = 2
 
 # 3 agents
-# utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
-#             [(-4,-1,0),(-5,-3,-2),(-6,-4,-6)],
-#             [(-2,-6,-7),(-4,-6,-7)]]
-# capacities = (1, 2, 1)  # capacity constraints
-# n = 3
+utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
+            [(-4,-1,0),(-5,-3,-2),(-6,-4,-6)],
+            [(-2,-6,-7),(-4,-6,-7)]]
+capacities = (1, 2, 1)  # capacity constraints
+n = 3
 
 I = Instance(utilities, capacities, n)
 algorithm1(I)

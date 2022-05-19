@@ -1,9 +1,6 @@
 import networkx as nx
 
 
-epsilon = 0.0001  # to solve numeric problems
-
-
 def create_G(w, utilities, s):
     """
     create Gw graph using the weights and the utilities and return it.
@@ -45,10 +42,22 @@ def recognize_agent_and_item(match):
     return agent, item
 
 
+def is_dummy(item):
+    """
+    :param item: a string in form o_c_j or d_c_j, 
+                 where o representing a real item and d representing a dummy item.
+    :return: true if the item is a dummy item, else return false.
+    """
+    type = item.split("_")[0]
+    if type == "d":
+        return True
+    return False 
+    
+
 def get_category_and_index(item):
     """
-    :param item: a string of form o_c_j (or d_c_j), 
-                 when c representing the category and j representing the index of the item in category c.
+    :param item: a string in form o_c_j (or d_c_j), 
+                 where c representing the category and j representing the index of the item in category c.
     :return: c and j
     """
     splitted = item.split("_")[1].split(",")
@@ -105,7 +114,7 @@ def isEF_two(first, second):
     return False
 
 
-def utility(agent, bundle, utilities):
+def utility_bundle(agent, bundle, utilities):
     """
     :param agent: agent index
     :param bundle: some bundle (Ai)
@@ -113,15 +122,24 @@ def utility(agent, bundle, utilities):
     """
     res = []
     for item in bundle:
-        type = item.split("_")[0]  # a real item or a dummy
-        if type == "d":
+        if is_dummy(item):
             res.append(0)
-        else:  # "o"
-            indices = item.split("_")[1].split(",")
-            category_indx = int(indices[0])
-            item_indx = int(indices[1])
+        else:  # a real item
+            category_indx, item_indx = get_category_and_index(item)
             res.append(utilities[category_indx][item_indx][agent])
     return res
+
+
+def utility_item(agent, item, utilities):
+    """
+    :param agent: agent index
+    :param item: some item
+    :return: the utility of the given agent over the given item
+    """
+    category, idx = get_category_and_index(item)
+    if is_dummy(item):
+        return 0
+    return utilities[category][idx][agent]
 
 
 def compute_r(i, j, oi, oj, utilities):
@@ -130,13 +148,11 @@ def compute_r(i, j, oi, oj, utilities):
     r(i,j,oi,oj) = [uj(oi)-uj(oj)] / [ui(oi)-ui(oj)]
     """
     # TODO: add edge cases!
-    oi_category, oi_idx = get_category_and_index(oi)
-    oj_category, oj_idx = get_category_and_index(oj)
     # numerator elements
-    ujoi = utilities[oi_category][oi_idx][j]
-    ujoj = utilities[oj_category][oj_idx][j]
+    ujoi = utility_item(j, oi, utilities)
+    ujoj = utility_item(j, oj, utilities)
     # denominator elements
-    uioi = utilities[oi_category][oi_idx][i]
-    uioj = utilities[oj_category][oj_idx][i]
+    uioi = utility_item(i, oi, utilities)
+    uioj = utility_item(i, oj, utilities)
     # ratio
     return (ujoi-ujoj) / (uioi-uioj)
