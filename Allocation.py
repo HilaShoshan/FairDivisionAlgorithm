@@ -128,20 +128,24 @@ class W_maximal_allocation:
         max_oi = None
         max_oj = None
         max_r = -inf
-        for key in self.item_pairs.keys():  # key = agents pair
+        for key in self.item_pairs.keys():  # key = agents pair (i,j)
             i = int(key.split(",")[0])
             j = int(key.split(",")[1])
             pairs_list = self.item_pairs[key]
+            # print("i,j: ", i, j)
             for pair in pairs_list:
                 oi = pair[0]
                 oj = pair[1]
                 r = compute_r(i, j, oi, oj, self.I.utilities)
+                # print("r(", i, ",", j, ",", oi, ",", oj, ") = ", r)
                 if r > max_r:
                     max_r = r
                     max_i = i
                     max_j = j
                     max_oi = oi
                     max_oj = oj
+            # print("____________________________________")
+        # print("maximum: ", max_i, max_j, (max_oi, max_oj))
         return max_i, max_j, (max_oi, max_oj)
 
 
@@ -149,9 +153,17 @@ class W_maximal_allocation:
         """
         exchange the given pair between agents i and j
         """
+        # update the allocation
         oi = exchangeable_pair[0]
         oj = exchangeable_pair[1]
         oi_idx = self.A[i].index(oi)  # the index of oi in A[i]
         oj_idx = self.A[j].index(oj)  # the index of oj in A[j]
         self.A[i][oi_idx] = oj
         self.A[j][oj_idx] = oi
+
+        # empty item-pairs list
+        self.item_pairs = {}
+
+        # delete edges from the envy graph
+        edges = list(self.envy_graph.edges)  # all the edges in the current envy graph
+        self.envy_graph.remove_edges_from(edges)
