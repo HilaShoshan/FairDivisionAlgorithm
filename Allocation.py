@@ -1,4 +1,3 @@
-from ast import Try
 from cmath import inf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,7 +29,16 @@ class W_maximal_allocation:
         self.save_envy_graph()
 
 
-    def get_w_maximal_allocation(self, w, plotGraph=False):
+    def save_Gw(self, G, V1, V2):
+        pos = dict()
+        pos.update((n, (1, i)) for i, n in enumerate(V1))  # put nodes from V1 at x=1
+        pos.update((n, (2, i)) for i, n in enumerate(V2))  # put nodes from V2 at x=2
+        nx.draw(G, pos=pos, with_labels=True)
+        plt.savefig("plots/Gw.png", format="PNG")
+        plt.close()
+
+
+    def get_w_maximal_allocation(self, w):
         """
         returns a w-maximal matching by a maximum weighted matching in Gw graph.
         :param w: a tuple in form w = (w1, w2, ..., wn)
@@ -43,12 +51,7 @@ class W_maximal_allocation:
         :param s: a list of size k of capacity constraints, s = (s1, s2, ..., sk)
         """
         G, V1, V2 = create_G(w, self.I.utilities, self.I.s)
-        if plotGraph:
-            pos = dict()
-            pos.update((n, (1, i)) for i, n in enumerate(V1))  # put nodes from V1 at x=1
-            pos.update((n, (2, i)) for i, n in enumerate(V2))  # put nodes from V2 at x=2
-            nx.draw(G, pos=pos, with_labels=True)
-            plt.show()
+        self.save_Gw(G, V1, V2)
         matching = nx.max_weight_matching(G, maxcardinality=True)
         return get_allocation(self.I.n, matching)
 
@@ -61,6 +64,18 @@ class W_maximal_allocation:
             uiAi_lst = utility_bundle(i, self.A[i], self.I.utilities)
             uiAj_lst = utility_bundle(i, self.A[j], self.I.utilities)
             if not isEF1_two(sum(uiAi_lst), sum(uiAj_lst), min(uiAi_lst), max(uiAj_lst)):
+                return False
+        return True  
+
+
+    def is_EF(self):
+        pairs = list(permutations(np.arange(self.I.n), 2))  # all the pairs of agents, with an importance to the order
+        for pair in pairs: 
+            i = pair[0]
+            j = pair[1]
+            uiAi_lst = utility_bundle(i, self.A[i], self.I.utilities)
+            uiAj_lst = utility_bundle(i, self.A[j], self.I.utilities)
+            if not isEF_two(sum(uiAi_lst), sum(uiAj_lst)):
                 return False
         return True    
 
@@ -89,7 +104,7 @@ class W_maximal_allocation:
     def save_envy_graph(self):
         pos = nx.spring_layout(self.envy_graph)
         nx.draw(self.envy_graph, pos, node_size=1000, node_color='yellow', font_size=8, font_weight='bold', with_labels=True)
-        plt.savefig("EnvyGraph.png", format="PNG")
+        plt.savefig("plots/EnvyGraph.png", format="PNG")
         plt.close()
 
 
@@ -129,6 +144,7 @@ class W_maximal_allocation:
         max_oi = None
         max_oj = None
         max_r = -inf
+        # print("____________________________________")
         for key in self.item_pairs.keys():  # key = agents pair (i,j)
             i = int(key.split(",")[0])
             j = int(key.split(",")[1])
@@ -145,8 +161,8 @@ class W_maximal_allocation:
                     max_j = j
                     max_oi = oi
                     max_oj = oj
-            # print("____________________________________")
         # print("maximum: ", max_i, max_j, (max_oi, max_oj))
+        # print("____________________________________")
         return max_i, max_j, (max_oi, max_oj)
 
 
