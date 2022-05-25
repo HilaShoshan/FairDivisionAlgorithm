@@ -1,27 +1,9 @@
-from turtle import color
-from matplotlib.pyplot import flag
 from Allocation import *
 from Instance import *
 
 
-# the allocations graph is specific for 3 agents case
-allocations_graph = nx.Graph()
-colors_dict = {
-    '1>2>3' : 'red',
-    '1>3>2' : 'blue',
-    '2>1>3' : 'yellow',
-    '2>3>1' : 'black',
-    '3>1>2' : 'purple',
-    '3>2>1' : 'green'
-}
-global NODE_COUNT, PREV_NODE
-NODE_COUNT = 0
-allocations_dict = {} 
-PREV_NODE = None
-color_map = []
-
-
 def update_allocations_graph(key):
+    global NODE_COUNT
     if key not in allocations_dict:
         color_map.append('gray')
         allocations_dict[key] = NODE_COUNT  # the value is also unique
@@ -48,14 +30,17 @@ def algorithm1(I, stopOnEF1=True):
     w = tuple([1/n]*n)  # a tuple of initial agents' weights (all equal)
     A = W_maximal_allocation(I, w)  # (A1, A2, ..., An), ∀i, Ai is of type list
     print("A = ", A.A)
+    global PREV_NODE
+    if not stopOnEF1:  # debug mode
+        key = ' '.join(map(str, A.A))  # TODO: if items indices are different, this should be the same key!
+        value, flag = update_allocations_graph(key)  # flag must to be true in the first allocation
+        PREV_NODE = value
     if A.is_EF1():
         print(A.A, " is EF1!")
         if stopOnEF1:
             return A
-        else:  # debug mode
-            key = ' '.join(map(str, A.A))  # TODO: if items indices are different, this should be the same key!
-            value, flag = update_allocations_graph(key)  # flag must to be true in the first allocation
-            PREV_NODE = value
+        else:
+            color_map[-1] = 'pink'  # update the color of the node of the EF1 allocation to pink (instead of gray)
 
     # Step 2: Build a set of item-pairs whose replacement increases the envy-agents' utilities:
     A.update_exchangeable_items()
@@ -63,6 +48,7 @@ def algorithm1(I, stopOnEF1=True):
 
     # Step 3: Switch items in order until an EF1 allocation is found
     while True:
+        # print("NODE_COUNT: ", NODE_COUNT, "\nPREV_NODE: ", PREV_NODE)
         if not A.is_EF1():
             A.exchange_pair(i, j, exchangeable_pair)
             print("exchange ", exchangeable_pair, " between ", i, " and ", j)
@@ -82,9 +68,8 @@ def algorithm1(I, stopOnEF1=True):
             print(A.A, " is EF1!")
             if stopOnEF1:
                 return A
-            else:
-                if flag:
-                    color_map[-1] = 'pink'  # update the color of the node of the EF1 allocation to pink (instead of gray)
+            else:  # if flag ?
+                color_map[-1] = 'pink'  # update the color of the node of the EF1 allocation to pink (instead of gray)
                 
 
 # 2 agents
@@ -113,20 +98,20 @@ n = 3
 
 I = Instance(utilities, capacities, n)
 
-# # the allocations graph is specific for 3 agents case
-# allocations_graph = nx.Graph()
-# colors_dict = {
-#     '1>2>3' : 'red',
-#     '1>3>2' : 'blue',
-#     '2>1>3' : 'yellow',
-#     '2>3>1' : 'black',
-#     '3>1>2' : 'purple',
-#     '3>2>1' : 'green'
-# }
-# allocations_dict = {} 
-# NODE_COUNT = 0
-# PREV_NODE = None
-# color_map = []
+# the allocations graph is specific for 3 agents case
+allocations_graph = nx.Graph()
+colors_dict = {
+    '1>2>3' : 'red',
+    '1>3>2' : 'blue',
+    '2>1>3' : 'yellow',
+    '2>3>1' : 'black',
+    '3>1>2' : 'purple',
+    '3>2>1' : 'green'
+}
+allocations_dict = {} 
+NODE_COUNT = 0
+PREV_NODE = None
+color_map = []
 
 algorithm1(I, stopOnEF1=False)
 
