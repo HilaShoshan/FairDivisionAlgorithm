@@ -31,7 +31,7 @@ def algorithm1(I, stopOnEF1=True):
     A = W_maximal_allocation(I, w)  # (A1, A2, ..., An), ∀i, Ai is of type list
     print("A = ", A.A)
     global PREV_NODE
-    key = ' '.join(map(str, A.A))  # TODO: if items indices are different, this should be the same key!
+    key = ' '.join(map(str, A.A))  # Note that this key is unique for each allocation, since we arranged it.
     value, flag = update_allocations_graph(key)  # flag must to be true in the first allocation
     PREV_NODE = value
     if A.is_EF1():
@@ -102,7 +102,7 @@ NODE_COUNT = 0
 PREV_NODE = None
 color_map = []
 
-stopOnEF1 = False
+stopOnEF1 = True
 algorithm1(I, stopOnEF1)
 
 nx.draw(allocations_graph, node_size=1000, font_size=8, font_weight='bold', node_color=color_map, with_labels=True)

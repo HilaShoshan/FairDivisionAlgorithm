@@ -1,4 +1,5 @@
 import networkx as nx
+import re
 
 
 def create_G(w, utilities, s):
@@ -66,14 +67,54 @@ def get_category_and_index(item):
     return c, j
 
 
-def get_allocation(n, matching):
+def arrange_categories(allocation, capacities):
+    """
+    :param allocation: the bundle of some agent in some allocation, sorted by categories indices
+    :param capacities: the capacity constraint of each category
+    :return: a list of lists of all the items that the agent gets from each category, 
+                that is also sorted according to the items' indices.
+                The indices representing by the second number in each item name, 
+                i.e. o_c,j --> c is the (common) category, and j is the index. 
+    """
+    start = 0
+    categories = [] 
+    # separate into categories 
+    for s_c in capacities:  # each agent gets exactly s_c items from each category C_c
+        categories.append(allocation[start: start + s_c])
+        start += s_c
+    # sort each category by the items' indices
+    for i in range(len(categories)):
+        categories[i].sort(key = lambda category : list(map(int, re.findall(r'\d+', category)))[1])
+    return categories
+
+
+def arrange_A(n, A, capacities):
+    """
+    Arrange the allocation such that the items in each sub-allocation Ai are arranged in a way 
+    that the categories are arranged by their indices, and also the items in each category.
+    This ensures that equivalent allocations are written in a unique way, according to this order.
+    :param n: the number of agents 
+    :param A: an allocation as a list
+    :param capacities: the capacities for each category
+    :return: the arranged allocation as a list
+    """
+    for agent in range(n):
+        allocation = A[agent]
+        allocation.sort(key = lambda allocation : list(map(int, re.findall(r'\d+', allocation)))[0])
+        categories = arrange_categories(allocation, capacities)
+        A[agent] = [item for sublist in categories for item in sublist]
+    return A
+
+
+def get_allocation(n, matching, capacities):
     # print(matching)
-    A = tuple(list() for _ in range(n))  # an empty allocation in form A = (A1, A2, ..., An)
+    A = list(list() for _ in range(n))  # an empty allocation in form A = (A1, A2, ..., An)
     for match in matching:
         agent, item = recognize_agent_and_item(match)
         A[agent].append(item)
         # print("item ", item, " appended to agent ", agent, " allocation.")
-    return A
+    A = arrange_A(n, A, capacities)
+    return tuple(A)
 
 
 def isEF1_two(first, second, worst, best):

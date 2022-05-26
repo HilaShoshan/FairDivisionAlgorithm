@@ -53,7 +53,7 @@ class W_maximal_allocation:
         G, V1, V2 = create_G(w, self.I.utilities, self.I.s)
         self.save_Gw(G, V1, V2)
         matching = nx.max_weight_matching(G, maxcardinality=True)
-        return get_allocation(self.I.n, matching)
+        return get_allocation(self.I.n, matching, self.I.s)
 
 
     def is_EF1(self):
@@ -177,6 +177,9 @@ class W_maximal_allocation:
         oj_idx = self.A[j].index(oj)  # the index of oj in A[j]
         self.A[i][oi_idx] = oj
         self.A[j][oj_idx] = oi
+
+        # arrange the allocation
+        self.A = tuple(arrange_A(self.I.n, list(self.A), self.I.s))
 
         # empty item-pairs list
         self.item_pairs = {}
