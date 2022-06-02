@@ -111,11 +111,6 @@ def algorithm1(I, stopOnEF1=True):
     return A
                 
 
-# 2 agents
-# utilities = [[(-100,-50),(0,0),(-900,0),(-30,-1),(-60,-5),(0,-6),(-12,-10)]]
-# capacities = tuple([4])
-# n = 2
-
 # 3 agents
 utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
             [(-4,-1,0),(-5,-3,-2),(-6,-4,-6)],
@@ -123,7 +118,7 @@ utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
 capacities = (1, 2, 1)  # capacity constraints
 n = 3
 
-I = Instance(utilities, capacities, n)
+I = Instance(utilities, capacities, n, type='same-sign')
 
 # this color dictionary is specific for 3 agents case
 color_dict = {

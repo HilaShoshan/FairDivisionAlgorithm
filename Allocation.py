@@ -57,14 +57,22 @@ class W_maximal_allocation:
 
 
     def is_EF1(self):
+        """
+        A boolean method, that checks if the allocation is EF1 -- for same-sign instances,
+        or is it's EF[1,1] -- fot general mixed instances.
+        """
         pairs = list(permutations(np.arange(self.I.n), 2))  # all the pairs of agents, with an importance to the order
         for pair in pairs: 
             i = pair[0]
             j = pair[1]
             uiAi_lst = utility_bundle(i, self.A[i], self.I.utilities)
             uiAj_lst = utility_bundle(i, self.A[j], self.I.utilities)
-            if not isEF1_two(sum(uiAi_lst), sum(uiAj_lst), min(uiAi_lst), max(uiAj_lst)):
-                return False
+            if self.I.type == 'same-sign':
+                if not isEF1_two(sum(uiAi_lst), sum(uiAj_lst), min(uiAi_lst), max(uiAj_lst)):
+                    return False
+            elif self.I.type == 'mixed':
+                if not isEF11_two(sum(uiAi_lst), sum(uiAj_lst), min(uiAi_lst), max(uiAj_lst)):
+                    return False
         return True  
 
 

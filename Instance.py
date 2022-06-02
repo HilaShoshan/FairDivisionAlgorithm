@@ -4,7 +4,7 @@ class Instance:
     This class representing an instance of a fair division problem,
     as defined in our paper
     """
-    def __init__(self, utilities, capacities, n):
+    def __init__(self, utilities, capacities, n, type='same-sign'):
         """
         :param n: number of agents
         :param utilities: a list of lists of tuples in form
@@ -16,6 +16,7 @@ class Instance:
         :param capacities: a list of size k of capacity constraints, s = (s1, s2, ..., sk)
         """
         self.n = n  # number of agents
+        self.type = type  # 'same-sign' or 'mixed'
         self.utilities = utilities
         self.s = capacities
         self.k = len(utilities)  # number of categories (equals to len(capacities))
