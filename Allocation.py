@@ -116,7 +116,7 @@ class W_maximal_allocation:
         plt.close()
 
 
-    def update_exchangeable_items(self):
+    def update_exchangeable_items(self, print=True):
         """
         Create a set of exchangeable pairs whose replacement will benefit the envy agents' utilities.
         It is actually a dictionary in form {
@@ -134,10 +134,12 @@ class W_maximal_allocation:
             ujAi_lst = utility_bundle(j, self.A[i], self.I.utilities)
             if not isEF_two(sum(ujAj_lst), sum(ujAi_lst)):  # j envious i
                 # find all the exchangeable pairs that can benefit him
-                print(j, "envious ", i)
+                if print:
+                    print(j, "envious ", i)
                 self.add_exchangeable_pairs_two(i, j)
                 self.envy_graph.add_edge(j, i)  # a directed edge from j to i, that represents that j envious i
-                print("updated exchangeable pairs list:\n", self.item_pairs)
+                if print:
+                    print("updated exchangeable pairs list:\n", self.item_pairs)
                 self.save_envy_graph()
 
 
@@ -195,3 +197,43 @@ class W_maximal_allocation:
         # delete edges from the envy graph
         edges = list(self.envy_graph.edges)  # all the edges in the current envy graph
         self.envy_graph.remove_edges_from(edges)
+
+
+    def is_w_maximal(self):
+        """
+        Check if allocation A is w-maximal, according to Lemma 4.7 in our paper [i <--> iii].
+        Specifically, we check the following:
+        1. for each exchangable pair (oi, oj) s.t. ui(oi) = ui(oj), uj(oj) >= uj(oi)
+        2. there exists some w ∈ R such that
+            all the r(i,j,oi,oj) of (oi,oj) with ui(oi) < ui(oj), greater or equal to w,
+            and
+            all the r(i,j,oi,oj) of (oi,oj) with ui(oi) > ui(oj), smaller or equal to w.
+            (all the r values of the first group are greater than all the r-values of the second group --> 
+            the minimum of the first group is greater than the maximum of the second group).
+        """
+        min_group1 = inf  # the maximal r-value of a pair from the group of pairs with ui(oi) < ui(oj)
+        max_group2 = -inf  # the minimal r-value of a pair from the group of pairs with ui(oi) > ui(oj)
+        for key in self.item_pairs.keys():  # key = agents pair (i,j)
+            i = int(key.split(",")[0])
+            j = int(key.split(",")[1])
+            pairs_list = self.item_pairs[key]
+            for pair in pairs_list:
+                oi = pair[0]
+                oj = pair[1]
+                uioi = utility_item(i, oi, self.I.utilities)
+                uioj = utility_item(i, oj, self.I.utilities)
+                ujoi = utility_item(j, oi, self.I.utilities)
+                ujoj = utility_item(j, oj, self.I.utilities)
+                if uioi == uioj and ujoj < ujoi:  # not uj(oj) >= uj(oi)
+                    return False
+                else:
+                    r = compute_r(i, j, oi, oj, self.I.utilities)
+                    if uioi < uioj:  # group1
+                        if r < min_group1:
+                            min_group1 = r  # update min
+                    else:  # uioi > uioj -- group2
+                        if r > max_group2:
+                            max_group2 = r  # upsate max
+        if min_group1 < max_group2:  # not min group1 >= max_group2
+            return False
+        return True

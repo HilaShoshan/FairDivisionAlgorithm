@@ -27,21 +27,29 @@ def get_category(m):
     )
 
 
-n = 3
-num_categories = random.randint(1, 10)
-utilities = []
-capacities = []
-for c in range(num_categories):
-    m = random.randint(2, 10)
-    utilities.append(get_category(m))
-    s_c = random.randint(int(math.ceil(m/n)), m)
-    capacities.append(s_c)
+def run(n):
+    num_categories = random.randint(1, 10)
+    utilities = []
+    capacities = []
+    for c in range(num_categories):
+        m = random.randint(2, 10)
+        utilities.append(get_category(m))
+        s_c = random.randint(int(math.ceil(m/n)), m)
+        capacities.append(s_c)
+    capacities = tuple(capacities)
+    I = Instance(utilities, capacities, n, type='mixed')
+    ans = algorithm1(I)
+    if ans == None:  # something is not working well
+        print(num_categories)
+        print(utilities)
+        print(capacities)
 
-capacities = tuple(capacities)
 
-print(num_categories)
-print(utilities)
-print(capacities, "\n_______________________________________________\n")
+def main():
+    for i in range(100):
+        print(i)
+        run(3)
 
-I = Instance(utilities, capacities, n, type='mixed')
-algorithm1(I)
+
+if __name__ == '__main__':
+    main()
