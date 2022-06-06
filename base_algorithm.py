@@ -28,7 +28,7 @@ def algorithm1(I):
     """
     # Step 1: Find a w-maximal feasible allocation that is EF for some agent.
     w = tuple([1/I.n]*I.n)  # a tuple of initial agents' weights (all equal)
-    A = W_maximal_allocation(I, w)  # (A1, A2, ..., An), ∀i, Ai is of type list
+    A = W_maximal_allocation(I, w, save_images=False)  # (A1, A2, ..., An), ∀i, Ai is of type list
     # print("A = ", A.A)
     global PREV_NODE
     key = ' '.join(map(str, A.A))  # Note that this key is unique for each allocation, since we arranged it.
@@ -55,7 +55,7 @@ def algorithm1(I):
             if not A.is_w_maximal():
                 print("Got an allocation that is not w-maximal :(")
                 return None
-            A.update_exchangeable_items(print=False)
+            A.update_exchangeable_items(to_print=False)
             PREV_NODE = value  # update previous node for the next iteration
             i, j, exchangeable_pair = A.get_max_r_pair()
         if A.is_EF1(): 

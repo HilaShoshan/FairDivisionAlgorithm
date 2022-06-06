@@ -11,9 +11,10 @@ class W_maximal_allocation:
     This allocation is updating in the class's methdods
     """
 
-    def __init__(self, I, w):
+    def __init__(self, I, w, save_images=True):
         self.I = I  # problem instance
         self.w = w  # agents' weights
+        self.save_images = save_images
         self.A = self.get_w_maximal_allocation(w)  # the allocation
         self.item_pairs = {}  # all the exchangeable pairs whose replacement will benefit the jealous agents
         self.init_envy_graphs()
@@ -33,11 +34,15 @@ class W_maximal_allocation:
             self.envy_graph.add_node(i, name=i)
             self.EF1_graph.add_node(i, name=i)
         # self.envy_graph.add_nodes_from(np.arange(self.I.n))  
-        self.save_envy_graph()
-        self.save_EF1_graph()
+        if self.save_images:
+            self.save_envy_graph()
+            self.save_EF1_graph()
 
 
     def save_Gw(self, G, V1, V2):
+        """
+        Saving Gw graph in a bipartite graph position, as Gw.png in 'plots' directory
+        """
         pos = dict()
         pos.update((n, (1, i)) for i, n in enumerate(V1))  # put nodes from V1 at x=1
         pos.update((n, (2, i)) for i, n in enumerate(V2))  # put nodes from V2 at x=2
@@ -59,7 +64,8 @@ class W_maximal_allocation:
         :param s: a list of size k of capacity constraints, s = (s1, s2, ..., sk)
         """
         G, V1, V2 = create_G(w, self.I.utilities, self.I.s)
-        self.save_Gw(G, V1, V2)
+        if self.save_images:
+            self.save_Gw(G, V1, V2)
         matching = nx.max_weight_matching(G, maxcardinality=True)
         return get_allocation(self.I.n, matching, self.I.s)
 
@@ -155,7 +161,8 @@ class W_maximal_allocation:
                 self.envy_graph.add_edge(j, i)  # a directed edge from j to i, that represents that j envious i
                 if to_print:
                     print("updated exchangeable pairs list:\n", self.item_pairs)
-                self.save_envy_graph()
+                if self.save_images:
+                    self.save_envy_graph()
 
             # update the EF1 graph
             if self.I.type == 'same-sign':
@@ -164,7 +171,8 @@ class W_maximal_allocation:
             elif self.I.type == 'mixed':
                 if not isEF11_two(sum(ujAj_lst), sum(ujAi_lst), min(ujAj_lst), max(ujAi_lst)):
                     self.EF1_graph.add_edge(j, i)  # add a directed edge from j to i
-            self.save_EF1_graph()
+            if self.save_images:
+                self.save_EF1_graph()
 
 
     def get_max_r_pair(self):
