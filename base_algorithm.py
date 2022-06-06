@@ -39,7 +39,7 @@ def algorithm1(I):
         return A
         
     # Step 2: Build a set of item-pairs whose replacement increases the envy-agents' utilities:
-    A.update_exchangeable_items(print=False)
+    A.update_exchangeable_items(to_print=False)
     i, j, exchangeable_pair = A.get_max_r_pair()
 
     # Step 3: Switch items in order until an EF1 allocation is found

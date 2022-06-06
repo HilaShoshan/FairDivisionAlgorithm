@@ -16,17 +16,25 @@ class W_maximal_allocation:
         self.w = w  # agents' weights
         self.A = self.get_w_maximal_allocation(w)  # the allocation
         self.item_pairs = {}  # all the exchangeable pairs whose replacement will benefit the jealous agents
-        self.init_envy_graph()
+        self.init_envy_graphs()
 
 
-    def init_envy_graph(self):
+    def init_envy_graphs(self):
+        """
+        Create an empty envy graph & EF1 graph, which is a graph with nodes that represent the agents,
+        and there is a directed edge from i to j iff i envious j in more than one item / in more than
+        one good and one chore in the mixed instances.
+        """
         self.fig = plt.figure(figsize=(8,6))
         self.envy_graph = nx.DiGraph()
+        self.EF1_graph = nx.DiGraph()
         # add nodes representing the agents
         for i in range(self.I.n):
             self.envy_graph.add_node(i, name=i)
+            self.EF1_graph.add_node(i, name=i)
         # self.envy_graph.add_nodes_from(np.arange(self.I.n))  
         self.save_envy_graph()
+        self.save_EF1_graph()
 
 
     def save_Gw(self, G, V1, V2):
@@ -116,7 +124,14 @@ class W_maximal_allocation:
         plt.close()
 
 
-    def update_exchangeable_items(self, print=True):
+    def save_EF1_graph(self):
+        pos = nx.spring_layout(self.EF1_graph)
+        nx.draw(self.EF1_graph, pos, node_size=1000, node_color='orange', font_size=8, font_weight='bold', with_labels=True)
+        plt.savefig("plots/EF1Graph.png", format="PNG")
+        plt.close()
+
+
+    def update_exchangeable_items(self, to_print=True):
         """
         Create a set of exchangeable pairs whose replacement will benefit the envy agents' utilities.
         It is actually a dictionary in form {
@@ -133,14 +148,23 @@ class W_maximal_allocation:
             ujAj_lst = utility_bundle(j, self.A[j], self.I.utilities)
             ujAi_lst = utility_bundle(j, self.A[i], self.I.utilities)
             if not isEF_two(sum(ujAj_lst), sum(ujAi_lst)):  # j envious i
-                # find all the exchangeable pairs that can benefit him
-                if print:
+                # find all the exchangeable pairs that can benefit j
+                if to_print:
                     print(j, "envious ", i)
                 self.add_exchangeable_pairs_two(i, j)
                 self.envy_graph.add_edge(j, i)  # a directed edge from j to i, that represents that j envious i
-                if print:
+                if to_print:
                     print("updated exchangeable pairs list:\n", self.item_pairs)
                 self.save_envy_graph()
+
+            # update the EF1 graph
+            if self.I.type == 'same-sign':
+                if not isEF1_two(sum(ujAj_lst), sum(ujAi_lst), min(ujAj_lst), max(ujAi_lst)):
+                    self.EF1_graph.add_edge(j, i)  # add a directed edge from j to i
+            elif self.I.type == 'mixed':
+                if not isEF11_two(sum(ujAj_lst), sum(ujAi_lst), min(ujAj_lst), max(ujAi_lst)):
+                    self.EF1_graph.add_edge(j, i)  # add a directed edge from j to i
+            self.save_EF1_graph()
 
 
     def get_max_r_pair(self):
@@ -194,9 +218,11 @@ class W_maximal_allocation:
         # empty item-pairs list
         self.item_pairs = {}
 
-        # delete edges from the envy graph
-        edges = list(self.envy_graph.edges)  # all the edges in the current envy graph
+        # delete edges from the envy graphs
+        edges = list(self.envy_graph.edges)  # all the edges in the current envy_graph
         self.envy_graph.remove_edges_from(edges)
+        edges = list(self.EF1_graph.edges)  # all the edges in the current EF1_graph
+        self.EF1_graph.remove_edges_from(edges)
 
 
     def is_w_maximal(self):

@@ -39,16 +39,19 @@ def run(n):
     capacities = tuple(capacities)
     I = Instance(utilities, capacities, n, type='mixed')
     ans = algorithm1(I)
-    if ans == None:  # something is not working well
+    if ans == None:  # something is not working well  -->  a counterexample was probably found
         print(num_categories)
         print(utilities)
         print(capacities)
+    return ans
 
 
 def main():
-    for i in range(100):
+    for i in range(200):
         print(i)
-        run(3)
+        ans = run(3)
+        if ans == None:
+            break  # stop searching
 
 
 if __name__ == '__main__':

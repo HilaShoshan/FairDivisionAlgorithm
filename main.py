@@ -20,13 +20,13 @@ def update_allocations_graph(key):
     return value, flag
 
 
-def get_edge_color(envy_graph):
+def get_edge_color(EF1_graph):
     """
-    :param envy_graph: the envy graph of some allocation. 
+    :param EF1_graph: the EF1 graph of some allocation. 
                         Has to be a DAG graph, since all allocations are w-maximal.
-    :return: an edge color determines by a topological ordering on the envy graph, and color_dict.
+    :return: an edge color determines by a topological ordering on the EF1 graph, and color_dict.
     """
-    topological = list(nx.all_topological_sorts(envy_graph))
+    topological = list(nx.all_topological_sorts(EF1_graph))
     colors = []
     for order in topological:
         reversed_order = list(reversed(order))
@@ -44,10 +44,10 @@ def get_common(a, b):
     b_set = set(b)
      
     # check length
-    intersection = a_set.intersection(b_set)
+    intersection = list(a_set.intersection(b_set))
     if len(intersection) > 0:
         return(intersection[0])  # return the first common element
-    else:
+    else:  # no common element
         return 'k'
 
 
@@ -85,14 +85,14 @@ def algorithm1(I, stopOnEF1=True):
     flag = True
     while flag:  # while we discover new allocations
         if not A.is_EF1() or not stopOnEF1:
-            colors_before = get_edge_color(A.envy_graph)  # the possible colors for the node of the current allocation (before the exchange)
+            colors_before = get_edge_color(A.EF1_graph)  # the possible colors for the node of the current allocation (before the exchange)
             A.exchange_pair(i, j, exchangeable_pair)
             print("exchange ", exchangeable_pair, " between ", i, " and ", j)
             print("\nupdated A = ", A.A)
             key = ' '.join(map(str, A.A))
             value, flag = update_allocations_graph(key)
             A.update_exchangeable_items()
-            colors_after = get_edge_color(A.envy_graph)  # possible colors after the exchange
+            colors_after = get_edge_color(A.EF1_graph)  # possible colors after the exchange
             edge_color = get_common(colors_before, colors_after)  # the common edge color before and after the exchange!
             print("colors_before: ", colors_before)
             print("colors_after: ", colors_after)
