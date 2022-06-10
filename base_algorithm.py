@@ -35,6 +35,7 @@ def algorithm1(I):
     value, flag = update_allocation_dict(key)  # flag must to be true in the first allocation
     PREV_NODE = value
     if A.is_EF1():
+        print("the initial allocation is EF1!")
         # print('\n', A.A, " is EF1!\n")
         return A
         
@@ -55,6 +56,7 @@ def algorithm1(I):
             if not A.is_w_maximal():
                 print("Got an allocation that is not w-maximal :(")
                 return None
+            A.empty_fields()  # clean the exchangeable_items list and the envy graphs
             A.update_exchangeable_items(to_print=False)
             PREV_NODE = value  # update previous node for the next iteration
             i, j, exchangeable_pair = A.get_max_r_pair()

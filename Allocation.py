@@ -186,25 +186,25 @@ class W_maximal_allocation:
         max_oi = None
         max_oj = None
         max_r = -inf
-        # print("____________________________________")
+        print("____________________________________")
         for key in self.item_pairs.keys():  # key = agents pair (i,j)
             i = int(key.split(",")[0])
             j = int(key.split(",")[1])
             pairs_list = self.item_pairs[key]
-            # print("i,j: ", i, j)
+            print("i,j: ", i, j)
             for pair in pairs_list:
                 oi = pair[0]
                 oj = pair[1]
                 r = compute_r(i, j, oi, oj, self.I.utilities)
-                # print("r(", i, ",", j, ",", oi, ",", oj, ") = ", r)
+                print("r(", i, ",", j, ",", oi, ",", oj, ") = ", r)
                 if r > max_r:
                     max_r = r
                     max_i = i
                     max_j = j
                     max_oi = oi
                     max_oj = oj
-        # print("maximum: ", max_i, max_j, (max_oi, max_oj))
-        # print("____________________________________")
+        print("maximum: ", max_i, max_j, (max_oi, max_oj), max_r)
+        print("____________________________________")
         return max_i, max_j, (max_oi, max_oj)
 
 
@@ -222,7 +222,13 @@ class W_maximal_allocation:
 
         # arrange the allocation
         self.A = tuple(arrange_A(self.I.n, list(self.A), self.I.s))
+    
 
+    def empty_fields(self):
+        """
+        this function is called before we find the new exchangeable items 
+        (in a new allocation after the exchange)
+        """
         # empty item-pairs list
         self.item_pairs = {}
 
@@ -250,6 +256,7 @@ class W_maximal_allocation:
         for key in self.item_pairs.keys():  # key = agents pair (i,j)
             i = int(key.split(",")[0])
             j = int(key.split(",")[1])
+            print("i, j: ", i, j)
             pairs_list = self.item_pairs[key]
             for pair in pairs_list:
                 oi = pair[0]
@@ -263,11 +270,14 @@ class W_maximal_allocation:
                 else:
                     r = compute_r(i, j, oi, oj, self.I.utilities)
                     if uioi < uioj:  # group1
+                        print("group1, r = ", r)
                         if r < min_group1:
                             min_group1 = r  # update min
                     else:  # uioi > uioj -- group2
+                        print("group2, r = ", r)
                         if r > max_group2:
                             max_group2 = r  # upsate max
         if min_group1 < max_group2:  # not min group1 >= max_group2
             return False
+        print(max_group2, " <= wi/wj <= ", min_group1)
         return True

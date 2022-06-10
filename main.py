@@ -87,6 +87,7 @@ def algorithm1(I, stopOnEF1=True):
         if not A.is_EF1() or not stopOnEF1:
             colors_before = get_edge_color(A.EF1_graph)  # the possible colors for the node of the current allocation (before the exchange)
             A.exchange_pair(i, j, exchangeable_pair)
+            A.empty_fields()
             print("exchange ", exchangeable_pair, " between ", i, " and ", j)
             print("\nupdated A = ", A.A)
             key = ' '.join(map(str, A.A))
@@ -108,17 +109,20 @@ def algorithm1(I, stopOnEF1=True):
             print('\n', A.A, " is EF1!\n")
             if stopOnEF1:
                 return A
+    print("No EF1 allocation was found :(")
     return A
                 
 
 # 3 agents
-utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
-            [(-4,-1,0),(-5,-3,-2),(-6,-4,-6)],
-            [(-2,-6,-7),(-4,-6,-7)]]
-capacities = (1, 2, 1)  # capacity constraints
+# utilities = [[(-1,0,-1),(-4,-1,-1),(-5,-2,-3)],
+#             [(-4,-1,0),(-5,-3,-2),(-6,-4,-6)],
+#             [(-2,-6,-7),(-4,-6,-7)]]
+# capacities = (1, 2, 1)  # capacity constraints
+utilities = [[(-24, -87, -91), (-3, -87, -11), (40, -3, 67), (-80, -97, -73)]]  # one category
+capacities = tuple([4])
 n = 3
 
-I = Instance(utilities, capacities, n, type='same-sign')
+I = Instance(utilities, capacities, n, type='mixed')
 
 # this color dictionary is specific for 3 agents case
 color_dict = {
