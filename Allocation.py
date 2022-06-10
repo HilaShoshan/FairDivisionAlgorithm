@@ -18,6 +18,7 @@ class W_maximal_allocation:
         self.A = self.get_w_maximal_allocation(w)  # the allocation
         self.item_pairs = {}  # all the exchangeable pairs whose replacement will benefit the jealous agents
         self.init_envy_graphs()
+        self.exchanged = []  # a list of pairs that have already exchanged
 
 
     def init_envy_graphs(self):
@@ -186,25 +187,33 @@ class W_maximal_allocation:
         max_oi = None
         max_oj = None
         max_r = -inf
-        print("____________________________________")
+        # print("____________________________________")
         for key in self.item_pairs.keys():  # key = agents pair (i,j)
             i = int(key.split(",")[0])
             j = int(key.split(",")[1])
             pairs_list = self.item_pairs[key]
-            print("i,j: ", i, j)
+            # print("i,j: ", i, j)
             for pair in pairs_list:
                 oi = pair[0]
                 oj = pair[1]
                 r = compute_r(i, j, oi, oj, self.I.utilities)
-                print("r(", i, ",", j, ",", oi, ",", oj, ") = ", r)
+                # print("r(", i, ",", j, ",", oi, ",", oj, ") = ", r)
                 if r > max_r:
                     max_r = r
                     max_i = i
                     max_j = j
                     max_oi = oi
                     max_oj = oj
-        print("maximum: ", max_i, max_j, (max_oi, max_oj), max_r)
-        print("____________________________________")
+                curr_pair = str(max_i) + '|' + str(max_j) + '|' + str(max_oi) + '|' + str(max_oj)
+                if r == max_r and curr_pair in self.exchanged:  # the current max pair has already exchanged between those agents
+                    # print("shalommmmmmmmm")
+                    max_r = r
+                    max_i = i
+                    max_j = j
+                    max_oi = oi
+                    max_oj = oj
+        # print("maximum: ", max_i, max_j, (max_oi, max_oj), max_r)
+        # print("____________________________________")
         return max_i, max_j, (max_oi, max_oj)
 
 
@@ -219,6 +228,11 @@ class W_maximal_allocation:
         oj_idx = self.A[j].index(oj)  # the index of oj in A[j]
         self.A[i][oi_idx] = oj
         self.A[j][oj_idx] = oi
+
+        # add the pair to the exchanged list
+        pair = str(j) + '|' + str(i) + '|' + str(oi) + '|' + str(oj)
+        self.exchanged.append(pair)
+        print("echanged items: ", self.exchanged)
 
         # arrange the allocation
         self.A = tuple(arrange_A(self.I.n, list(self.A), self.I.s))
