@@ -35,7 +35,7 @@ def algorithm1(I):
     value, flag = update_allocation_dict(key)  # flag must to be true in the first allocation
     PREV_NODE = value
     if A.is_EF1():
-        print("the initial allocation is EF1!")
+        # print("the initial allocation is EF1!")
         # print('\n', A.A, " is EF1!\n")
         return A
         

@@ -16,6 +16,7 @@ class W_maximal_allocation:
         self.w = w  # agents' weights
         self.save_images = save_images
         self.A = self.get_w_maximal_allocation(w)  # the allocation
+        self.all_item_pairs = {}  # all the exchangeable pairs
         self.item_pairs = {}  # all the exchangeable pairs whose replacement will benefit the jealous agents
         self.init_envy_graphs()
 
@@ -26,7 +27,6 @@ class W_maximal_allocation:
         and there is a directed edge from i to j iff i envious j in more than one item / in more than
         one good and one chore in the mixed instances.
         """
-        self.fig = plt.figure(figsize=(8,6))
         self.envy_graph = nx.DiGraph()
         self.EF1_graph = nx.DiGraph()
         # add nodes representing the agents
@@ -102,7 +102,8 @@ class W_maximal_allocation:
         return True    
 
 
-    def add_exchangeable_pairs_two(self, i, j):
+    def add_exchangeable_pairs_two(self, i, j, all=False):
+        # print("add_exchangeable_pairs_two\n i,j = ", i, j, '\n Ai = ', self.A[i], '\n Aj = ', self.A[j])
         for oi in self.A[i]:
             for oj in self.A[j]:
                 # check if both items are in the same category
@@ -110,17 +111,25 @@ class W_maximal_allocation:
                 oj_category, oj_idx = get_category_and_index(oj)
                 if oi_category != oj_category:
                     continue
-                # check if j preferes oi
-                ujoi = utility_item(j, oi, self.I.utilities)
-                ujoj = utility_item(j, oj, self.I.utilities)
-                if ujoi > ujoj:
-                    key = str(i) + "," + str(j)
-                    if key not in self.item_pairs.keys():
-                        self.item_pairs[key] = [(oi, oj)]
-                    else: 
-                        value = self.item_pairs[key]
+                key = str(i) + "," + str(j)
+                if all:
+                    if key not in self.all_item_pairs.keys():
+                        self.all_item_pairs[key] = [(oi, oj)]
+                    else:
+                        value = self.all_item_pairs[key]
                         value.append(tuple((oi, oj)))  # add this pair to the value list
-                        self.item_pairs[key] = value  # update it in the dictionary
+                        self.all_item_pairs[key] = value  # update it in the dictionary
+                else:
+                    # check if j preferes oi
+                    ujoi = utility_item(j, oi, self.I.utilities)
+                    ujoj = utility_item(j, oj, self.I.utilities)
+                    if ujoi > ujoj:
+                        if key not in self.item_pairs.keys():
+                            self.item_pairs[key] = [(oi, oj)]
+                        else: 
+                            value = self.item_pairs[key]
+                            value.append(tuple((oi, oj)))  # add this pair to the value list
+                            self.item_pairs[key] = value  # update it in the dictionary
 
                     
     def save_envy_graph(self):
@@ -139,25 +148,29 @@ class W_maximal_allocation:
 
     def update_exchangeable_items(self, to_print=True):
         """
-        Create a set of exchangeable pairs whose replacement will benefit the envy agents' utilities.
+        Create two sets of exchangeable pairs, and save them as class's fields.
+        1) self.item_pairs: all the exchangeable pairs whose replacement will benefit the envy agents' utilities.
         It is actually a dictionary in form {
                                                 'i,j': [(),(),...]  # here j envious i
                                                 ...
                                             }
         i.e., the keys are the pairs of agents that the exchangeable pairs belong to them,
         and the values are lists of exchangeable pairs that benefit agent j (the jealous one).
+        2) self.all_item_pairs: all the exchangeable pairs in this allocation. 
+        Has similar form as self.item_pairs. Used in "is_w_maximal" method.
         """
         pairs = list(permutations(np.arange(self.I.n), 2))  
         for pair in pairs: 
             i = pair[0]
             j = pair[1]
+            self.add_exchangeable_pairs_two(i, j, all=True)  # add to self.all_item_pairs
             ujAj_lst = utility_bundle(j, self.A[j], self.I.utilities)
             ujAi_lst = utility_bundle(j, self.A[i], self.I.utilities)
             if not isEF_two(sum(ujAj_lst), sum(ujAi_lst)):  # j envious i
                 # find all the exchangeable pairs that can benefit j
                 if to_print:
                     print(j, "envious ", i)
-                self.add_exchangeable_pairs_two(i, j)
+                self.add_exchangeable_pairs_two(i, j, all=False)  # add to self.item_pairs
                 self.envy_graph.add_edge(j, i)  # a directed edge from j to i, that represents that j envious i
                 if to_print:
                     print("updated exchangeable pairs list:\n", self.item_pairs)
@@ -255,11 +268,13 @@ class W_maximal_allocation:
         """
         min_group1 = inf  # the maximal r-value of a pair from the group of pairs with ui(oi) < ui(oj)
         max_group2 = -inf  # the minimal r-value of a pair from the group of pairs with ui(oi) > ui(oj)
-        for key in self.item_pairs.keys():  # key = agents pair (i,j)
+        print("CHECKING W-MAXIMALITY...")
+        # print("all_item_pairs is: ", self.all_item_pairs)
+        for key in self.all_item_pairs.keys():  # key = agents pair (i,j)
             i = int(key.split(",")[0])
             j = int(key.split(",")[1])
             # print("i, j: ", i, j)
-            pairs_list = self.item_pairs[key]
+            pairs_list = self.all_item_pairs[key]
             for pair in pairs_list:
                 oi = pair[0]
                 oj = pair[1]
@@ -268,6 +283,7 @@ class W_maximal_allocation:
                 ujoi = utility_item(j, oi, self.I.utilities)
                 ujoj = utility_item(j, oj, self.I.utilities)
                 if uioi == uioj and ujoj < ujoi:  # not uj(oj) >= uj(oi)
+                    print("FAILED in first condition:\n i, j, oi, oj, uioi, uioj, ujoj, ujoi = ", i, j, oi, oj, uioi, uioj, ujoj, ujoi)
                     return False
                 else:
                     r = compute_r(i, j, oi, oj, self.I.utilities)
@@ -280,6 +296,7 @@ class W_maximal_allocation:
                         if r > max_group2:
                             max_group2 = r  # update max
         if min_group1 < max_group2:  # not min group1 >= max_group2
+            print("FAILED in second condition:\n i, j, max_group2, min_group1 = ", i, j, max_group2, min_group1)
             return False
-        print("is_w_maximal function: ", max_group2, " <= wi/wj <= ", min_group1)
+        print(max_group2, " <= wi/wj <= ", min_group1)
         return True

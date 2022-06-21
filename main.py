@@ -93,6 +93,8 @@ def algorithm1(I, stopOnEF1=True):
             key = ' '.join(map(str, A.A))
             value, flag = update_allocations_graph(key)
             A.update_exchangeable_items()
+            if not A.is_w_maximal():
+                print("Got an allocation that is not w-maximal :(")
             colors_after = get_edge_color(A.EF1_graph)  # possible colors after the exchange
             edge_color = get_common(colors_before, colors_after)  # the common edge color before and after the exchange!
             print("colors_before: ", colors_before)

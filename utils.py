@@ -1,3 +1,4 @@
+from cmath import inf
 import networkx as nx
 import re
 
@@ -188,12 +189,18 @@ def compute_r(i, j, oi, oj, utilities):
     computes the difference ratio r (by definition 4.6):
     r(i,j,oi,oj) = [uj(oi)-uj(oj)] / [ui(oi)-ui(oj)]
     """
-    # TODO: add edge cases!
     # numerator elements
     ujoi = utility_item(j, oi, utilities)
     ujoj = utility_item(j, oj, utilities)
+    if ujoi == ujoj:  # first edge case
+        return 0
     # denominator elements
     uioi = utility_item(i, oi, utilities)
     uioj = utility_item(i, oj, utilities)
+    if uioi == uioj:  # second edge case
+        if ujoi > ujoj:
+            return inf
+        else:  # ujoi < ujoj
+            return -inf
     # ratio
     return (ujoi-ujoj) / (uioi-uioj)
