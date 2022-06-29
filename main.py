@@ -123,11 +123,11 @@ n = 3
 #             [(-2,-6,-7),(-4,-6,-7)]]
 # capacities = (1, 2, 1)  # capacity constraints
 
-utilities = [[(-24, -87, -91), (-3, -87, -11), (40, -3, 67), (-80, -97, -73)]]  # one category
-capacities = tuple([4])
+# utilities = [[(-24, -87, -91), (-3, -87, -11), (40, -3, 67), (-80, -97, -73)]]  # one category
+# capacities = tuple([4])
 
-# utilities = [[(75, 78, 20), (-74, -59, -100)], [(76, -11, 8), (-17, 1, 7)]]  # two categories
-# capacities = (1, 1)
+utilities = [[(75, 78, 20), (-74, -59, -100)], [(76, -11, 8), (-17, 1, 7)]]  # two categories
+capacities = (1, 1)
 
 I = Instance(utilities, capacities, n, type='mixed')
 
