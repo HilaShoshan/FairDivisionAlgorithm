@@ -291,15 +291,19 @@ class W_maximal_allocation:
                         # print("group1, r = ", r)
                         if r < min_group1:
                             min_group1 = r  # update min
+                            # if r == 0.26666666666666666:
+                            #     print("i, j, oi, oj, r: ", i, j, oi, oj, r)
                     else:  # uioi > uioj -- group2
                         # print("group2, r = ", r)
                         if r > max_group2:
                             max_group2 = r  # update max
+                            # if r == 1.3513513513513513:
+                            #     print("i, j, oi, oj, r: ", i, j, oi, oj, r)
             if min_group1 < max_group2:  # not min group1 >= max_group2
                 print("FAILED in second condition:\n i, j, max_group2, min_group1 = ", i, j, max_group2, min_group1)
                 return False
             else:
-                # print("i,j = ", i, ",", j, ": ", max_group2, " <= wi/wj <= ", min_group1)
+                print(max_group2, " <= w", i, "/ w", j, " <= ", min_group1)
                 min_group1 = inf 
                 max_group2 = -inf
         return True  # all the conditions of Lemma 4.7(iii) are true for all the pairs i!=j
