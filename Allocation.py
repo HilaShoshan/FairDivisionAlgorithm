@@ -244,8 +244,9 @@ class W_maximal_allocation:
         this function is called before we find the new exchangeable items 
         (in a new allocation after the exchange)
         """
-        # empty item-pairs list
+        # empty item-pairs lists
         self.item_pairs = {}
+        self.all_item_pairs = {}
 
         # delete edges from the envy graphs
         edges = list(self.envy_graph.edges)  # all the edges in the current envy_graph
@@ -275,6 +276,8 @@ class W_maximal_allocation:
             j = int(key.split(",")[1])
             # print("i, j: ", i, j)
             pairs_list = self.all_item_pairs[key]
+            # if i == 0 and j == 2:
+                # print(pairs_list)
             for pair in pairs_list:
                 oi = pair[0]
                 oj = pair[1]
